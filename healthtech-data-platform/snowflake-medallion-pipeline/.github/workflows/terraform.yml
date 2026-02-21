@@ -39,3 +39,22 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
+
+      - name: Install SnowSQL
+        run: |
+          pip install snowflake-connector-python
+          curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.21-linux_x86_64.bash
+          bash snowsql-1.2.21-linux_x86_64.bash
+
+      - name: Run All SQL Scripts
+        env:
+          SNOWSQL_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWSQL_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWSQL_PWD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWSQL_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+        run: |
+          snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -r $SNOWSQL_ROLE -q "USE DATABASE  <your_db>;"
+          find iot-wearables-data-lakehouse -type f -name '*.sql' | sort | while read file; do
+            echo "Running $file..."
+            snowsql -a $SNOWSQL_ACCOUNT -u $SNOWSQL_USER -r $SNOWSQL_ROLE -f "$file"
+          done
