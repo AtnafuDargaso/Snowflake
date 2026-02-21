@@ -50,6 +50,29 @@ The data reaches S3 via **Amazon Data Firehose**. It acts as the "buffer." Inste
 
 ---
 
+## Multi-Region Architecture: US and EU
+
+To support global hospital networks and regulatory requirements, the pipeline is designed for multi-region deployment:
+
+### US Region
+- Data ingested from US hospitals is processed and stored in AWS US regions (e.g., us-east-1, us-west-2).
+- Snowflake accounts are provisioned in US-based data centers.
+- HIPAA compliance and US-specific privacy controls are enforced.
+
+### EU Region
+- Data ingested from EU hospitals is processed and stored in AWS EU regions (e.g., eu-west-1, eu-central-1).
+- Snowflake accounts are provisioned in EU-based data centers.
+- GDPR compliance and EU-specific privacy controls are enforced.
+
+### Global Design Considerations
+- Data never crosses regional boundaries; US and EU data are isolated for compliance.
+- Each region has its own ingestion, transformation, and storage pipeline.
+- Secure Data Sharing is enabled within each region, allowing hospitals to access only their local data.
+- Cross-region sharing is possible for de-identified, aggregated data, subject to legal review.
+- Infrastructure as Code (Terraform) provisions resources in both US and EU regions.
+
+> **Note:** Ensure encryption, access control, and audit policies are region-specific and compliant with local regulations.
+
 > **Note:** If the data contains PII (Personally Identifiable Information), ensure S3 buckets use **AES-256 encryption** and Snowflake is configured with **HIPAA-compliant** Business Critical editions.
 
 
