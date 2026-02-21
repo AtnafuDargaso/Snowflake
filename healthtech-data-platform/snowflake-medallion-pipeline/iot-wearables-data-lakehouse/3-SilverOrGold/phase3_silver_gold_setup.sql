@@ -51,6 +51,11 @@ USING (
         LOAD_TIMESTAMP
     FROM BRONZE_TO_SILVER_STREAM
     WHERE METADATA$ACTION = 'INSERT' -- Use standard metadata column for inserts
+        -- Possible options:
+        --   METADATA$ACTION = 'INSERT'   -- Only new inserted rows
+        --   METADATA$ACTION = 'DELETE'   -- Only deleted rows (if tracking deletes)
+        --   METADATA$ISUPDATE = TRUE     -- Rows that are part of an update operation (if updates are tracked)
+        --   METADATA$ROW_ID              -- Unique row identifier (for deduplication/advanced logic)
 ) src
 ON tgt.PATIENT_ID = src.PATIENT_ID AND tgt.RECORD_TIMESTAMP = src.RECORD_TIMESTAMP
 WHEN MATCHED THEN UPDATE SET
