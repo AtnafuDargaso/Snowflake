@@ -21,20 +21,10 @@ CREATE OR REPLACE PIPE BRONZE_IOT_RAW_PIPE AS
   )
   ON_ERROR = 'CONTINUE';
 
--- Step 2b: Create Snowpipe for Automated Ingestion from S3 with SQS Notification
-CREATE OR REPLACE PIPE RAW_IOT_SNOWPIPE
-  AS
-  COPY INTO BRONZE_IOT_RAW
-  FROM @RAW_IOT_STAGE
-  FILE_FORMAT = (FORMAT_NAME = JSON_FORMAT);
-
--- Step 2c: Configure S3 Event Notification to SQS
+-- Step 2b: Configure S3 Event Notification to SQS
 -- In AWS, configure S3 bucket to send event notifications to an SQS queue whenever new files are uploaded.
 -- Snowpipe listens to the SQS queue and triggers ingestion automatically.
 -- Reference: See infra/aws_snowflake_storage_integration.md for setup details.
-
--- Step 2d: Grant Usage on Snowpipe
-GRANT USAGE ON PIPE RAW_IOT_SNOWPIPE TO ROLE INGESTION_ROLE;
 
 -- Step 3: Grant Required Privileges (example for role-based access)
 GRANT INSERT ON TABLE BRONZE_IOT_RAW TO ROLE INGESTION_ROLE;
