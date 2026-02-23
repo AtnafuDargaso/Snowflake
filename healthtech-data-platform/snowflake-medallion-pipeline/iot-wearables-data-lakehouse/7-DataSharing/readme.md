@@ -40,6 +40,168 @@ To facilitate sharing data with these consumers, you can create reader accounts.
 Each reader account belongs to the provider account that created it. As a provider, you use shares to share databases with reader accounts; however, a reader account can only consume data from the provider account that created it. Refer to the following diagram:
 ![alt text](image-1.png)
 
+This diagram represents **Secure Data Sharing** in Snowflake:
+
+* Provider account
+* Multiple databases (db1, db2)
+* Multiple shares (share1, share2, share3)
+* Multiple consumer accounts
+* Read-only shared databases created in consumer side
+
+Below is the **complete SQL example** that matches this architecture.
+
+---
+
+# 🏢 PROVIDER ACCOUNT (Top Section of Diagram)
+
+---
+
+## 🔹 1️⃣ Create Share1 (from db1.schema_a)
+
+```sql
+-- Create a share object
+CREATE OR REPLACE SHARE share1;
+
+-- Grant usage on database and schema
+GRANT USAGE ON DATABASE db1 TO SHARE share1;
+GRANT USAGE ON SCHEMA db1.schema_a TO SHARE share1;
+
+-- Grant select on specific tables
+GRANT SELECT ON ALL TABLES IN SCHEMA db1.schema_a TO SHARE share1;
+
+-- Optional: future tables
+GRANT SELECT ON FUTURE TABLES IN SCHEMA db1.schema_a TO SHARE share1;
+```
+
+Add consumer accounts:
+
+```sql
+ALTER SHARE share1 ADD ACCOUNTS = ('CONSUMER_ACCOUNT_1', 'CONSUMER_ACCOUNT_2');
+```
+
+---
+
+## 🔹 2️⃣ Create Share2 (from db2.schema_c)
+
+```sql
+CREATE OR REPLACE SHARE share2;
+
+GRANT USAGE ON DATABASE db2 TO SHARE share2;
+GRANT USAGE ON SCHEMA db2.schema_c TO SHARE share2;
+
+GRANT SELECT ON ALL TABLES IN SCHEMA db2.schema_c TO SHARE share2;
+GRANT SELECT ON FUTURE TABLES IN SCHEMA db2.schema_c TO SHARE share2;
+
+ALTER SHARE share2 ADD ACCOUNTS = ('CONSUMER_ACCOUNT_3');
+```
+
+---
+
+## 🔹 3️⃣ Create Share3 (from db2.schema_d)
+
+```sql
+CREATE OR REPLACE SHARE share3;
+
+GRANT USAGE ON DATABASE db2 TO SHARE share3;
+GRANT USAGE ON SCHEMA db2.schema_d TO SHARE share3;
+
+GRANT SELECT ON ALL TABLES IN SCHEMA db2.schema_d TO SHARE share3;
+GRANT SELECT ON FUTURE TABLES IN SCHEMA db2.schema_d TO SHARE share3;
+
+ALTER SHARE share3 ADD ACCOUNTS = ('CONSUMER_ACCOUNT_4');
+```
+
+---
+
+# 👤 CONSUMER ACCOUNT SIDE (Bottom of Diagram)
+
+Each consumer creates a **read-only database** from the share.
+
+---
+
+## 🔹 Consumer 1 (from share1)
+
+```sql
+CREATE DATABASE shared_db1 FROM SHARE PROVIDER_ACCOUNT.share1;
+```
+
+---
+
+## 🔹 Consumer 2 (also from share1)
+
+```sql
+CREATE DATABASE mydb1 FROM SHARE PROVIDER_ACCOUNT.share1;
+```
+
+---
+
+## 🔹 Consumer 3 (from share2)
+
+```sql
+CREATE DATABASE mydb2 FROM SHARE PROVIDER_ACCOUNT.share2;
+```
+
+---
+
+## 🔹 Consumer 4 (from share3)
+
+```sql
+CREATE DATABASE db2_share FROM SHARE PROVIDER_ACCOUNT.share3;
+```
+
+---
+
+# 🔐 Important Notes
+
+✔ Shared data is **read-only** for consumers
+✔ No data is copied (zero-copy sharing)
+✔ Storage cost stays with provider
+✔ Compute cost is paid by consumer
+✔ Secure views can be shared instead of base tables
+
+---
+
+# 🧠 Enterprise Best Practice
+
+Instead of sharing raw tables, share **secure views**:
+
+```sql
+CREATE SECURE VIEW db1.schema_a.secure_orders AS
+SELECT *
+FROM db1.schema_a.orders
+WHERE region = 'US';
+```
+
+Then:
+
+```sql
+GRANT SELECT ON VIEW db1.schema_a.secure_orders TO SHARE share1;
+```
+
+This allows:
+
+* Row-level filtering
+* Column masking
+* Tenant isolation
+* Regulatory control
+
+---
+
+# Summary
+
+> “How does Snowflake sharing work?”
+
+Answer:
+
+* Provider creates SHARE
+* Grants database, schema, table access
+* Adds consumer accounts
+* Consumer creates database from share
+* Data remains in provider
+* No copy occurs
+* Fully secure & read-only
+
+
 Note:
 ## What is a **Share** in Snowflake Inc.?
 
