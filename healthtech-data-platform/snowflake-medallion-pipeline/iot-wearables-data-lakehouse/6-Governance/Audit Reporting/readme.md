@@ -25,12 +25,12 @@ This directory contains SQL scripts and guidance for generating monthly audit re
 
 | Component      | Status      | Purpose                                      |
 |---------------|-------------|----------------------------------------------|
-| Ingestion     | ✅ Complete  | Wearable → S3 → Snowpipe → Bronze            |
-| Processing    | ✅ Complete  | Streams & Tasks → Flattened Gold Table       |
-| Performance   | ✅ Complete  | Clustering by PATIENT_ID for < 5s latency    |
-| Security      | ✅ Complete  | Row-Level Security + Secure Views            |
-| Privacy       | ✅ Complete  | Dynamic Masking on SSN/DOB                   |
-| Governance    | ✅ Complete  | Real-time Abuse Alerts + Audit Reporting      |
+| Ingestion     |  Complete  | Wearable → S3 → Snowpipe → Bronze            |
+| Processing    |  Complete  | Streams & Tasks → Flattened Gold Table       |
+| Performance   |  Complete  | Clustering by PATIENT_ID for < 5s latency    |
+| Security      |  Complete  | Row-Level Security + Secure Views            |
+| Privacy       |  Complete  | Dynamic Masking on SSN/DOB                   |
+| Governance    |  Complete  | Real-time Abuse Alerts + Audit Reporting      |
 
 ## Additional Notes
 
