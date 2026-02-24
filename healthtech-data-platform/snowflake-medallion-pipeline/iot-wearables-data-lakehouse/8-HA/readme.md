@@ -17,3 +17,30 @@ This phase implements high availability and disaster recovery strategies for the
 ## Notes
 - Ensure all regions are compliant with local regulations.
 - Document recovery procedures and RTO/RPO targets.
+
+
+# Snowflake Single-Region Architecture
+
+Within one cloud region (e.g., AWS us-east-1):
+
+Snowflake automatically provides:
+
+ Compute High Availability
+
+Warehouses use multiple nodes
+If one node fails → Snowflake replaces it
+Queries retry automatically
+
+ Storage High Availability
+
+Data stored in cloud object storage
+Replicated across multiple availability zones (AZs)
+11 9’s durability (via cloud provider)
+
+ Services Layer HA
+
+Cloud services layer is redundant
+Metadata highly available
+So yes — Snowflake is HA within a region by design.
+
+You do NOT configure it manually.
